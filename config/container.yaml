@@ -1,0 +1,4 @@
+# Integration to nomess
+
+Nomess\Component\Cache\CacheHandlerInterface: Nomess\Component\Cache\CacheHandler
+Nomess\Component\Cache\Builder\CacheBuilderInterface: Nomess\Component\Cache\Builder\CacheBuilder
