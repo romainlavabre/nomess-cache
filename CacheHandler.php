@@ -61,6 +61,8 @@ class CacheHandler extends AbstractCache implements CacheHandlerInterface
     public function add( string $name, array $parameters ): CacheHandlerInterface
     {
         $this->cacheBuilder->add( $parameters, $name );
+        
+        return $this;
     }
     
     
