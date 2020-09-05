@@ -26,6 +26,12 @@ class CacheBuilder extends AbstractCache implements CacheBuilderInterface
      */
     public function add( array $parameters, string $name ): void
     {
+        $satus = $this->configuration['cache'][$name]['enable'];
+        
+        if( ( $satus === 'auto' && NOMESS_CONTEXT === 'DEV' ) || !$satus ) {
+            return;
+        }
+        
         $parameters = $this->validParameters( $parameters, $name );
         $content    = $this->before( $name, $parameters );
         $this->write( $content, $parameters, $name );
