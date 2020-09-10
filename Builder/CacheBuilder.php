@@ -56,13 +56,22 @@ class CacheBuilder extends AbstractCache implements CacheBuilderInterface
             if( !array_key_exists( 'default', $credentials ) && !array_key_exists( $parameter, $parameters ) ) {
                 throw new InvalidArgumentException( 'The parameter "' . $parameter . '" is required for cache' );
             } else {
-                $parameters[$parameter] = $credentials['default'];
+                if(array_key_exists('default', $credentials)) {
+                    $parameters[$parameter] = $credentials['default'];
+                }
             }
             
-            if( array_key_exists( 'contraint', $credentials ) ) {
+            if( array_key_exists( 'constraint', $credentials ) ) {
+    
+                if(is_string($this->configuration['rules']['constraint'][$credentials['constraint']]['function'])) {
+                    $this->configuration['rules']['constraint'][$credentials['constraint']]['function'] = $this->isValidCallable(
+                        $this->configuration['rules']['constraint'][$credentials['constraint']]['function']
+                    );
+                }
+                
                 if( call_user_func_array(
-                        $this->configuration['rules']['constraint'][$credentials['constraint']],
-                        [ $parameters[$parameter] ] ) !== $this->configuration['rules']['constraint'][$credentials['constraint']['expected']] ) {
+                        $this->configuration['rules']['constraint'][$credentials['constraint']]['function'],
+                        [ $parameters[$parameter] ] ) !== $this->configuration['rules']['constraint'][$credentials['constraint']]['expected'] ) {
                     
                     throw new InvalidArgumentException( 'The parameter "' . $parameter . '" does not respect constraint ' . $credentials['contraint'] );
                 }
@@ -119,11 +128,24 @@ class CacheBuilder extends AbstractCache implements CacheBuilderInterface
         if( $this->hasPath( $name ) ) {
             $path = $this->configuration['cache'][$name]['path'];
             
-            if( is_dir( $this->cache_root . $path ) ) {
+            if( !is_dir( $this->cache_root . $path ) ) {
                 mkdir( $this->cache_root . $path );
             }
         }
         
         file_put_contents( $this->getPath( $name ) . $parameters['filename'], serialize( $content ) );
+    }
+    
+    private function isValidCallable(string $function)
+    {
+        if(!is_callable($function)){
+            if($function === 'empty'){
+                return function ($value){
+                    return empty($value);
+                };
+            }
+        }
+        
+        return $function;
     }
 }

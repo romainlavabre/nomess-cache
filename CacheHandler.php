@@ -18,9 +18,13 @@ class CacheHandler extends AbstractCache implements CacheHandlerInterface
     private CacheBuilderInterface $cacheBuilder;
     
     
-    public function __construct( ConfigStoreInterface $configStore, ContainerInterface $container )
+    public function __construct(
+        ConfigStoreInterface $configStore,
+        ContainerInterface $container,
+        CacheBuilderInterface $cacheBuilder )
     {
         parent::__construct( $configStore, $container );
+        $this->cacheBuilder = $cacheBuilder;
     }
     
     
@@ -29,6 +33,12 @@ class CacheHandler extends AbstractCache implements CacheHandlerInterface
      */
     public function get( string $name, string $filename = NULL )
     {
+        $satus = $this->configuration['cache'][$name]['enable'];
+    
+        if( ( $satus === 'auto' && NOMESS_CONTEXT === 'DEV' ) || !$satus ) {
+            return NULL;
+        }
+        
         $this->hasConfiguration( $name );
         $path = $this->getPath( $name );
         
@@ -37,6 +47,8 @@ class CacheHandler extends AbstractCache implements CacheHandlerInterface
             if( file_exists( $file = $path . $filename ) ) {
                 return $this->getCastedContent( $name, file_get_contents( $file ) );
             }
+            
+            return NULL;
         }
         
         // If the configuration has not specific path, throw exception
@@ -139,6 +151,10 @@ class CacheHandler extends AbstractCache implements CacheHandlerInterface
     
     private function scanDirectory( string $directory ): array
     {
+        if(!is_dir($directory)){
+            return [];
+        }
+        
         $content = scandir( $directory );
         
         if( is_array( $content ) ) {
