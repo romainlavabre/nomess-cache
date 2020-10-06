@@ -10,6 +10,8 @@
     ],
     "require": {
         "nomess/config": "*",
+        "nomess/kernel": "*",
+        "nomess/cli": "*",
         "ext-json": "*"
     },
     "autoload": {

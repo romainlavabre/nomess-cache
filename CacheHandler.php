@@ -53,7 +53,7 @@ class CacheHandler extends AbstractCache implements CacheHandlerInterface
         
         // If the configuration has not specific path, throw exception
         if( !$this->hasPath( $name ) ) {
-            throw new InvalidSendException( 'Impossible to defined the target files, your configuration not specify path' );
+            throw new InvalidSendException( 'Impossible to defined the target files, your configuration for "' . $name . '" not specify path' );
         }
         
         $result = array();
